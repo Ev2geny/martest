@@ -20,7 +20,7 @@ def _():
         and we will need to download it from github.
         """
         from pathlib import Path
-    
+
         EXPECTED_IN_MOLAB_NAMES: set[str] = {
             "lock.txt",
             "notebook.py",
@@ -126,7 +126,17 @@ def _():
         for item in data:
             _copy_item(repo, item, branch)
 
-    return (_api_get, _copy_item, _download, copy_data_from_github,)
+    return (copy_data_from_github,)
+
+
+@app.cell
+def _(copy_data_from_github):
+    copy_data_from_github(
+        repo="Ev2geny/martest",
+        branch="main",
+        data=["my_dir", "my_file.txt"]
+    )
+    return
 
 
 if __name__ == "__main__":
