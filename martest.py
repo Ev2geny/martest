@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.20.4"
+__generated_with = "0.23.3"
 app = marimo.App(width="medium")
 
 
@@ -8,25 +8,24 @@ app = marimo.App(width="medium")
 def _():
     import marimo as mo
 
-    return (mo,)
+    return
 
 
 @app.cell
-def _(mo):
-    slider = mo.ui.slider(
-        start=0,
-        stop=100,
-        step=1,
-        value=50,
-    )
+def _():
+    import os
 
-    slider
-    return (slider,)
+    def runtime_environment() -> str:
+        return os.environ.get("NOTEBOOK_RUNTIME", "local")
+
+    return (runtime_environment,)
 
 
 @app.cell
-def _(slider):
-    slider.value
+def _(runtime_environment):
+    runtime = runtime_environment()
+
+    runtime
     return
 
 
