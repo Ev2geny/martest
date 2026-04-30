@@ -134,7 +134,7 @@ def _(copy_data_from_github):
     copy_data_from_github(
         repo="Ev2geny/martest",
         branch="main",
-        data=["my_dir", "my_file.txt"]
+        data=["my_dir/", "my_file.txt"]
     )
     return
 
