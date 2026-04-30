@@ -42,7 +42,7 @@ def _():
     import urllib.request
     from pathlib import Path
 
-    def _api_get(repo: str, path: str, branch: str) -> dict | list:
+    def api_get(repo: str, path: str, branch: str) -> dict | list:
         """Fetch the GitHub Contents API response for a given repo path.
 
         Calls https://api.github.com/repos/{repo}/contents/{path}?ref={branch}.
@@ -65,7 +65,7 @@ def _():
         with urllib.request.urlopen(url) as resp:
             return json.loads(resp.read().decode())
 
-    def _download(download_url: str, local_path: Path) -> None:
+    def download(download_url: str, local_path: Path) -> None:
         """Download a single file from a URL and write it to a local path.
 
         Intermediate directories are created automatically if they do not exist.
@@ -82,7 +82,7 @@ def _():
         with urllib.request.urlopen(download_url) as resp:
             local_path.write_bytes(resp.read())
 
-    def _copy_item(repo: str, path: str, branch: str) -> None:
+    def copy_item(repo: str, path: str, branch: str) -> None:
         """Recursively copy a file or directory from GitHub to the local filesystem.
 
         If *path* resolves to a file, that file is downloaded. If it resolves to a
@@ -94,15 +94,15 @@ def _():
             path:   Path to a file or directory relative to the repository root.
             branch: Branch, tag, or commit SHA to resolve the path against.
         """
-        contents = _api_get(repo, path, branch)
+        contents = api_get(repo, path, branch)
         if isinstance(contents, dict):
-            _download(contents["download_url"], Path(contents["path"]))
+            download(contents["download_url"], Path(contents["path"]))
         else:
             for item in contents:
                 if item["type"] == "file":
-                    _download(item["download_url"], Path(item["path"]))
+                    download(item["download_url"], Path(item["path"]))
                 elif item["type"] == "dir":
-                    _copy_item(repo, item["path"], branch)
+                    copy_item(repo, item["path"], branch)
 
     def copy_data_from_github(repo: str, branch: str, data: list) -> None:
         """Copy files and/or directories from a GitHub repository to the local environment.
@@ -124,7 +124,7 @@ def _():
             )
         """
         for item in data:
-            _copy_item(repo, item, branch)
+            copy_item(repo, item, branch)
 
     return (copy_data_from_github,)
 
