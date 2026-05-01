@@ -1,3 +1,1 @@
-https://molab.marimo.io/github.com/Ev2geny/martest/blob/main/martest.py
-
-https://molab.marimo.io/github.com/Ev2geny/beanquery-interactive-manual/blob/develop/manual.py
+update 1
