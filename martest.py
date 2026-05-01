@@ -8,7 +8,7 @@ app = marimo.App(width="medium")
 def _():
     import marimo as mo
 
-    return
+    return (mo,)
 
 
 @app.cell
@@ -37,7 +37,8 @@ def _():
 
 
 @app.cell
-def _():
+def _(mo):
+    import hashlib
     import json
     import urllib.request
     from pathlib import Path
@@ -65,6 +66,11 @@ def _():
         with urllib.request.urlopen(url) as resp:
             return json.loads(resp.read().decode())
 
+    def git_blob_sha(local_path: Path) -> str:
+        data = local_path.read_bytes()
+        header = f"blob {len(data)}\0".encode()
+        return hashlib.sha1(header + data).hexdigest()
+
     def download(download_url: str, local_path: Path) -> None:
         """Download a single file from a URL and write it to a local path.
 
@@ -82,6 +88,20 @@ def _():
         with urllib.request.urlopen(download_url) as resp:
             local_path.write_bytes(resp.read())
 
+    def download_item_if_needed(local_path: Path, sha: str, download_url: str) -> None:
+
+        mo.output.append(f"Downloading {local_path}...")
+
+        if local_path.exists():
+            mo.output.append(f"File already exists. Skipping")
+            return
+
+        if git_blob_sha(local_path) == sha:
+            mo.output.append(f"File already exists and matches expected SHA. Skipping")
+            return
+
+        download(download_url, local_path)
+
     def copy_item(repo: str, path: str, branch: str) -> None:
         """Recursively copy a file or directory from GitHub to the local filesystem.
 
@@ -95,12 +115,15 @@ def _():
             branch: Branch, tag, or commit SHA to resolve the path against.
         """
         contents = api_get(repo, path, branch)
+
+        # in case this is an individual fle
         if isinstance(contents, dict):
-            download(contents["download_url"], Path(contents["path"]))
+            download_item_if_needed(Path(contents["path"]), contents["sha"], contents["download_url"])
         else:
+        # in case this is a directory    
             for item in contents:
                 if item["type"] == "file":
-                    download(item["download_url"], Path(item["path"]))
+                    download_item_if_needed(Path(item["path"]), item["sha"], item["download_url"])
                 elif item["type"] == "dir":
                     copy_item(repo, item["path"], branch)
 
