@@ -84,21 +84,23 @@ def _(mo):
         Raises:
             urllib.error.URLError: If the download URL is unreachable.
         """
+        mo.output.append(f"downloading file {local_path}")
+    
         local_path.parent.mkdir(parents=True, exist_ok=True)
         with urllib.request.urlopen(download_url) as resp:
             local_path.write_bytes(resp.read())
 
     def download_item_if_needed(local_path: Path, sha: str, download_url: str) -> None:
 
-        mo.output.append(f"Downloading {local_path}...")
+        mo.output.append(f"checking to download {local_path}...")
 
         if local_path.exists():
-            mo.output.append(f"File already exists. Skipping")
-            return
-
-        if git_blob_sha(local_path) == sha:
-            mo.output.append(f"File already exists and matches expected SHA. Skipping")
-            return
+            mo.output.append(f"File already exists")
+            if git_blob_sha(local_path) == sha:
+                mo.output.append(f"File already exists and matches expected SHA. Skipping")
+            else:
+                mo.output.append("File exists, but sha is different")
+                pass
 
         download(download_url, local_path)
 
